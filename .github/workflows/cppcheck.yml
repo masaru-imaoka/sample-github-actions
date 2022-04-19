@@ -27,7 +27,7 @@ jobs:
     - name: cppcheck
       run: |
         pwd
-        ./cppcheck/cppcheck -j 4 --enable=warning --force --output-file=cppcheck_warning_temp.txt -rp=/runner/_work/ishin-client/ishin-client ./Classes > /dev/null
+        ./cppcheck/cppcheck -j 4 --enable=warning --force --output-file=cppcheck_warning_temp.txt -rp=/runner/_work/sample-github-actions/sample-github-actions ./Classes > /dev/null
         # エスケープ文字除去＋パス指定加工
         cat cppcheck_warning_temp.txt | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})*)?m//g" | grep "warning: "> cppcheck_warning.txt
 
