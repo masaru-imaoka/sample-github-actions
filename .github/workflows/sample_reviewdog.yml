@@ -1,0 +1,14 @@
+name: "reviewdog"
+
+on:
+  pull_request:
+
+jobs:
+  # --------------------------------
+  reviewdog:
+    name: reviewdog
+    runs-on: [ ubuntu-20.04 ]
+
+    steps:
+    - name: setup reviewdog
+      uses: reviewdog/action-setup@b1013d1adcc361fba9441c82873054d3be8834c7

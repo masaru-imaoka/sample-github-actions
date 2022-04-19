@@ -1,0 +1,40 @@
+name: "cppcheck"
+
+on:
+  pull_request:
+
+jobs:
+  # --------------------------------
+  cppcheck_execute:
+    name: cppcheck_execute
+    runs-on: [ ubuntu-20.04 ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup cppcheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpcre3 libpcre3-dev
+        git clone https://github.com/danmar/cppcheck.git
+        cd cppcheck
+        #22/04/15時点のver2.7を使用
+        git checkout 6ba6567ad897d56741159f8af90fc354ae050e61
+        make MATCHCOMPILER=yes FILESDIR=./ HAVE_RULES=yes CXXFLAGS="-O2 -DNDEBUG -Wall -Wno-sign-compare -Wno-unused-function"
+        cd ..
+
+    - name: cppcheck
+      run: |
+        pwd
+        ./cppcheck/cppcheck -j 4 --enable=warning --force --output-file=cppcheck_warning_temp.txt -rp=/runner/_work/ishin-client/ishin-client ./Classes > /dev/null
+        # エスケープ文字除去＋パス指定加工
+        cat cppcheck_warning_temp.txt | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})*)?m//g" | grep "warning: "> cppcheck_warning.txt
+
+    - name: setup reviewdog
+      uses: reviewdog/action-setup@b1013d1adcc361fba9441c82873054d3be8834c7
+
+    - name: pull request comment
+      env:
+            REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: cat cppcheck_warning.txt | reviewdog -efm="%f:%l:%c:%m" -reporter=github-pr-review -name="cppcheck"
